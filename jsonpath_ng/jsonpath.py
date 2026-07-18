@@ -726,8 +726,16 @@ class Index(JSONPath):
         rv = []
         for index in self.indices:
             # invalid indices do not crash, return [] instead
-            if datum.value and len(datum.value) > index:
-                rv += [DatumInContext(datum.value[index], path=Index(index), context=datum)]
+            try:
+                if not datum.value or len(datum.value) <= index:
+                    continue
+                rv += [
+                    DatumInContext(
+                        datum.value[index], path=Index(index), context=datum
+                    )
+                ]
+            except (TypeError, IndexError, KeyError, AttributeError):
+                continue
         return rv
 
     def update(self, data, val):
